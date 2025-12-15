@@ -10,13 +10,20 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 50px;
+    padding: 20px;
     background: #f4f4f4;
+    margin: 0;
+  }
+  h1 {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 20px;
+    word-break: break-word;
   }
   #textDisplay {
     font-size: 24px;
     margin-bottom: 20px;
-    max-width: 600px;
+    max-width: 100%;
     line-height: 1.5;
     white-space: pre-wrap;
     word-break: break-word;
@@ -40,10 +47,12 @@
   #result {
     margin-top: 20px;
     font-size: 20px;
+    text-align: center;
   }
   /* Progress Bar Styles */
   #progressContainer {
-    width: 600px;
+    width: 100%;
+    max-width: 600px;
     height: 20px;
     background: #ddd;
     border-radius: 10px;
@@ -55,6 +64,12 @@
     width: 0%;
     background: #4caf50;
     transition: width 0.2s ease;
+  }
+  /* Unsichtbares Input für mobile Tastatur */
+  #hiddenInput {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
   }
 </style>
 </head>
@@ -69,6 +84,9 @@
   <div id="progressBar"></div>
 </div>
 
+<!-- Unsichtbares Input für mobile Tastatur -->
+<input type="text" id="hiddenInput" autofocus />
+
 <script>
   const words = ["haus", "auto", "baum", "katze", "hund", "apfel", "tisch", "stuhl", "fenster", "buch"];
   let currentWordIndex = 0;
@@ -78,6 +96,16 @@
   const textDisplay = document.getElementById('textDisplay');
   const result = document.getElementById('result');
   const progressBar = document.getElementById('progressBar');
+  const hiddenInput = document.getElementById('hiddenInput');
+
+  // Fokus automatisch setzen, damit Tastatur auf Mobilgeräten öffnet
+  function focusInput() {
+    hiddenInput.focus();
+  }
+
+  // Auf Klick irgendwo fokussieren, falls Fokus verloren geht
+  document.body.addEventListener('touchstart', focusInput);
+  window.addEventListener('click', focusInput);
 
   function renderWord() {
     textDisplay.innerHTML = '';
@@ -109,8 +137,8 @@
     progressBar.style.width = progressPercent + '%';
   }
 
-  window.addEventListener('keydown', (e) => {
-    const char = e.key.length === 1 ? e.key : '';
+  hiddenInput.addEventListener('input', (e) => {
+    const char = e.data;
     if(!char) return;
     if(currentWordIndex >= words.length) return;
 
@@ -118,6 +146,7 @@
     currentCharIndex++;
 
     renderWord();
+    hiddenInput.value = ''; // Input zurücksetzen, sonst doppelte Eingaben
 
     // Wort fertig getippt?
     const word = words[currentWordIndex];
@@ -138,7 +167,9 @@
   });
 
   renderWord();
+  focusInput(); // Fokus beim Laden setzen
 </script>
 
 </body>
 </html>
+
