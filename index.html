@@ -16,14 +16,14 @@
   }
   h1 {
     text-align: center;
-    font-size: 28px;
+    font-size: 6vw; /* responsive Schriftgröße */
     margin-bottom: 20px;
     word-break: break-word;
   }
   #textDisplay {
-    font-size: 24px;
+    font-size: 5vw; /* responsive */
     margin-bottom: 20px;
-    max-width: 100%;
+    max-width: 95%;
     line-height: 1.5;
     white-space: pre-wrap;
     word-break: break-word;
@@ -46,18 +46,19 @@
   }
   #result {
     margin-top: 20px;
-    font-size: 20px;
+    font-size: 5vw;
     text-align: center;
   }
   /* Progress Bar Styles */
   #progressContainer {
-    width: 100%;
-    max-width: 600px;
-    height: 20px;
+    width: 90%; /* passt sich mobilen Bildschirmen an */
+    height: 6vw;
     background: #ddd;
     border-radius: 10px;
     margin-top: 20px;
     overflow: hidden;
+    margin-left: auto;
+    margin-right: auto;
   }
   #progressBar {
     height: 100%;
@@ -65,11 +66,14 @@
     background: #4caf50;
     transition: width 0.2s ease;
   }
-  /* Unsichtbares Input für mobile Tastatur */
-  #hiddenInput {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
+  /* Sichtbares kleines Input für mobile Tastatur */
+  #mobileInput {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    opacity: 0.01; /* fast unsichtbar, aber fokussierbar */
+    width: 1px;
+    height: 1px;
   }
 </style>
 </head>
@@ -84,92 +88,74 @@
   <div id="progressBar"></div>
 </div>
 
-<!-- Unsichtbares Input für mobile Tastatur -->
-<input type="text" id="hiddenInput" autofocus />
+<!-- Kleines Input für mobile Tastatur -->
+<input type="text" id="mobileInput" />
 
 <script>
-  const words = ["haus", "auto", "baum", "katze", "hund", "apfel", "tisch", "stuhl", "fenster", "buch"];
-  let currentWordIndex = 0;
-  let currentCharIndex = 0;
-  let typedChars = [];
+const words = ["haus","auto","baum","katze","hund","apfel","tisch","stuhl","fenster","buch"];
+let currentWordIndex = 0;
+let currentCharIndex = 0;
+let typedChars = [];
 
-  const textDisplay = document.getElementById('textDisplay');
-  const result = document.getElementById('result');
-  const progressBar = document.getElementById('progressBar');
-  const hiddenInput = document.getElementById('hiddenInput');
+const textDisplay = document.getElementById('textDisplay');
+const result = document.getElementById('result');
+const progressBar = document.getElementById('progressBar');
+const mobileInput = document.getElementById('mobileInput');
 
-  // Fokus automatisch setzen, damit Tastatur auf Mobilgeräten öffnet
-  function focusInput() {
-    hiddenInput.focus();
-  }
-
-  // Auf Klick irgendwo fokussieren, falls Fokus verloren geht
-  document.body.addEventListener('touchstart', focusInput);
-  window.addEventListener('click', focusInput);
-
-  function renderWord() {
-    textDisplay.innerHTML = '';
-    if(currentWordIndex >= words.length) return;
-
-    const word = words[currentWordIndex];
-    for(let idx = 0; idx < word.length; idx++) {
-      const span = document.createElement('span');
-      span.textContent = word[idx];
-
-      if(idx < currentCharIndex) {
-        span.className = typedChars[idx] === word[idx] ? 'correct' : 'incorrect';
-      } else {
-        span.className = 'pending';
-      }
-
-      // Cursor vor dem aktuellen Buchstaben
-      if(idx === currentCharIndex) {
-        const cursor = document.createElement('span');
-        cursor.className = 'cursor';
-        textDisplay.appendChild(cursor);
-      }
-
-      textDisplay.appendChild(span);
+function renderWord() {
+  textDisplay.innerHTML = '';
+  if(currentWordIndex >= words.length) return;
+  const word = words[currentWordIndex];
+  for(let idx = 0; idx < word.length; idx++){
+    const span = document.createElement('span');
+    span.textContent = word[idx];
+    if(idx < currentCharIndex) span.className = typedChars[idx]===word[idx]?'correct':'incorrect';
+    else span.className = 'pending';
+    if(idx===currentCharIndex){
+      const cursor = document.createElement('span');
+      cursor.className = 'cursor';
+      textDisplay.appendChild(cursor);
     }
-
-    // Progress Bar aktualisieren
-    const progressPercent = (currentWordIndex / words.length) * 100;
-    progressBar.style.width = progressPercent + '%';
+    textDisplay.appendChild(span);
   }
+  const progressPercent = (currentWordIndex/words.length)*100;
+  progressBar.style.width = progressPercent+'%';
+}
 
-  hiddenInput.addEventListener('input', (e) => {
-    const char = e.data;
-    if(!char) return;
-    if(currentWordIndex >= words.length) return;
+// Fokus auf Input setzen, damit Tastatur erscheint
+function focusMobileInput(){
+  mobileInput.focus();
+}
+window.addEventListener('load', focusMobileInput);
+document.body.addEventListener('touchstart', focusMobileInput);
+window.addEventListener('click', focusMobileInput);
 
-    typedChars[currentCharIndex] = char;
-    currentCharIndex++;
-
-    renderWord();
-    hiddenInput.value = ''; // Input zurücksetzen, sonst doppelte Eingaben
-
-    // Wort fertig getippt?
-    const word = words[currentWordIndex];
-    if(currentCharIndex === word.length) {
-      currentWordIndex++;
-      currentCharIndex = 0;
-      typedChars = [];
-
-      if(currentWordIndex < words.length) {
-        renderWord(); // Nächstes Wort anzeigen
-      } else {
-        // Alle Wörter fertig
-        textDisplay.innerHTML = '';
-        result.textContent = 'Fertig!';
-        progressBar.style.width = '100%';
-      }
-    }
-  });
-
+mobileInput.addEventListener('input',(e)=>{
+  const char = e.data;
+  if(!char || currentWordIndex>=words.length) return;
+  typedChars[currentCharIndex] = char;
+  currentCharIndex++;
   renderWord();
-  focusInput(); // Fokus beim Laden setzen
+  mobileInput.value=''; // Input zurücksetzen
+
+  const word = words[currentWordIndex];
+  if(currentCharIndex===word.length){
+    currentWordIndex++;
+    currentCharIndex=0;
+    typedChars=[];
+    if(currentWordIndex<words.length){
+      renderWord();
+    } else {
+      textDisplay.innerHTML='';
+      result.textContent='Fertig!';
+      progressBar.style.width='100%';
+    }
+  }
+});
+
+renderWord();
+focusMobileInput();
 </script>
 
 </body>
 </html>
-
