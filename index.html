@@ -11,12 +11,12 @@
     flex-direction: column;
     align-items: center;
     padding: 20px;
-    background: #f4f4f4;
     margin: 0;
+    background: #f4f4f4;
   }
   h1 {
     text-align: center;
-    font-size: 6vw; /* responsive Schriftgröße */
+    font-size: 6vw; /* responsive */
     margin-bottom: 20px;
     word-break: break-word;
   }
@@ -51,14 +51,13 @@
   }
   /* Progress Bar Styles */
   #progressContainer {
-    width: 90%; /* passt sich mobilen Bildschirmen an */
+    width: 90%;
+    max-width: 600px;
     height: 6vw;
     background: #ddd;
     border-radius: 10px;
     margin-top: 20px;
     overflow: hidden;
-    margin-left: auto;
-    margin-right: auto;
   }
   #progressBar {
     height: 100%;
@@ -66,14 +65,16 @@
     background: #4caf50;
     transition: width 0.2s ease;
   }
-  /* Sichtbares kleines Input für mobile Tastatur */
+  /* Kleines sichtbares Input-Feld für mobile Tastatur */
   #mobileInput {
     position: fixed;
     bottom: 10px;
-    left: 10px;
-    opacity: 0.01; /* fast unsichtbar, aber fokussierbar */
-    width: 1px;
-    height: 1px;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0.05;
+    width: 80px;
+    height: 40px;
+    font-size: 16px;
   }
 </style>
 </head>
@@ -83,13 +84,11 @@
 <div id="textDisplay"></div>
 <div id="result"></div>
 
-<!-- Progress Bar -->
 <div id="progressContainer">
   <div id="progressBar"></div>
 </div>
 
-<!-- Kleines Input für mobile Tastatur -->
-<input type="text" id="mobileInput" />
+<input type="text" id="mobileInput" autofocus />
 
 <script>
 const words = ["haus","auto","baum","katze","hund","apfel","tisch","stuhl","fenster","buch"];
@@ -106,34 +105,35 @@ function renderWord() {
   textDisplay.innerHTML = '';
   if(currentWordIndex >= words.length) return;
   const word = words[currentWordIndex];
-  for(let idx = 0; idx < word.length; idx++){
+  for(let idx=0; idx<word.length; idx++){
     const span = document.createElement('span');
     span.textContent = word[idx];
-    if(idx < currentCharIndex) span.className = typedChars[idx]===word[idx]?'correct':'incorrect';
-    else span.className = 'pending';
+    if(idx<currentCharIndex) span.className = typedChars[idx]===word[idx]?'correct':'incorrect';
+    else span.className='pending';
     if(idx===currentCharIndex){
       const cursor = document.createElement('span');
-      cursor.className = 'cursor';
+      cursor.className='cursor';
       textDisplay.appendChild(cursor);
     }
     textDisplay.appendChild(span);
   }
+  // Progress Bar pro Wort
   const progressPercent = (currentWordIndex/words.length)*100;
   progressBar.style.width = progressPercent+'%';
 }
 
-// Fokus auf Input setzen, damit Tastatur erscheint
-function focusMobileInput(){
+// Fokus auf Input, damit mobile Tastatur erscheint
+function focusInput(){
   mobileInput.focus();
 }
-window.addEventListener('load', focusMobileInput);
-document.body.addEventListener('touchstart', focusMobileInput);
-window.addEventListener('click', focusMobileInput);
+window.addEventListener('load', focusInput);
+document.body.addEventListener('touchstart', focusInput);
+window.addEventListener('click', focusInput);
 
-mobileInput.addEventListener('input',(e)=>{
+mobileInput.addEventListener('input', (e)=>{
   const char = e.data;
   if(!char || currentWordIndex>=words.length) return;
-  typedChars[currentCharIndex] = char;
+  typedChars[currentCharIndex]=char;
   currentCharIndex++;
   renderWord();
   mobileInput.value=''; // Input zurücksetzen
@@ -154,8 +154,9 @@ mobileInput.addEventListener('input',(e)=>{
 });
 
 renderWord();
-focusMobileInput();
+focusInput();
 </script>
 
 </body>
 </html>
+
