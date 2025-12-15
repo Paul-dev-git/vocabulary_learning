@@ -71,7 +71,7 @@
     bottom: 10px;
     left: 50%;
     transform: translateX(-50%);
-    opacity: 0.05;
+    opacity: 0.05; /* fast unsichtbar */
     width: 80px;
     height: 40px;
     font-size: 16px;
@@ -88,7 +88,14 @@
   <div id="progressBar"></div>
 </div>
 
-<input type="text" id="mobileInput" autofocus />
+<!-- Input für mobile Tastatur -->
+<input type="text" 
+       id="mobileInput" 
+       autofocus 
+       autocapitalize="none" 
+       autocomplete="off" 
+       autocorrect="off" 
+       spellcheck="false" />
 
 <script>
 const words = ["haus","auto","baum","katze","hund","apfel","tisch","stuhl","fenster","buch"];
@@ -122,7 +129,7 @@ function renderWord() {
   progressBar.style.width = progressPercent+'%';
 }
 
-// Fokus auf Input, damit mobile Tastatur erscheint
+// Fokus auf Input setzen, damit mobile Tastatur erscheint
 function focusInput(){
   mobileInput.focus();
 }
@@ -159,4 +166,5 @@ focusInput();
 
 </body>
 </html>
+
 
